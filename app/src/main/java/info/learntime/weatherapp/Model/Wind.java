@@ -3,7 +3,7 @@ package info.learntime.weatherapp.Model;
 public class Wind {
 
     private double speed ;
-    private int deg ;
+    private double deg ;
 
     public Wind() {
     }
@@ -16,7 +16,7 @@ public class Wind {
         this.speed = speed;
     }
 
-    public int getDeg() {
+    public double getDeg() {
         return deg;
     }
 

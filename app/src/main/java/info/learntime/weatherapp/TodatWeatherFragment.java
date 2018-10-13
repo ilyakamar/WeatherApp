@@ -94,6 +94,7 @@ public class TodatWeatherFragment extends Fragment {
                                @Override
                                public void accept(WeatherResult weatherResult) throws Exception {
 
+                                   // Load image
                                    Picasso.get().load(new StringBuilder("https://openweathermap.org/img/w/")
                                            .append(weatherResult.getWeather().get(0).getIcon())
                                            .append(".png").toString()).into(img_weather);
@@ -133,50 +134,3 @@ public class TodatWeatherFragment extends Fragment {
 
 }
 
-/*private void getWeatherInformation() {
-        compositeDisposable.add(mService.getWeatherByLatLng(String.valueOf(Common.current_location.getLatitude()),
-                String.valueOf(Common.current_location.getLongitude()),
-                Common.APP_ID,
-                "metric")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<WeatherResult>() {
-                    @Override
-                    public void accept(WeatherResult weatherResult) throws Exception {
-
-                        Picasso.get().load(new StringBuilder("https://openweathermap.org/img/w/")
-                                .append(weatherResult.getWeather().get(0).getIcon())
-                        .append(".png").toString()).into(img_weather);
-
-                        // Load information
-                        txt_city_name.setText(weatherResult.getName());
-                        txt_description.setText(new StringBuilder("Weather in ")
-                        .append(weatherResult.getName()).toString());
-                        txt_temperature.setText(new StringBuilder(
-                                String.valueOf(weatherResult.getMain().getTemp())).append("°C").toString());
-                        txt_date_time.setText(Common.convertUnixToDate(weatherResult.getDt()));
-                        txt_pressure.setText(new StringBuilder(String.valueOf(weatherResult.getMain().getPressure())).append(" hpa").toString());
-                        txt_humidity.setText(new StringBuilder(String.valueOf(weatherResult.getMain().getHumidity())).append(" %").toString());
-                        txt_sunrise.setText(Common.convertUnixToHour(weatherResult.getSys().getSunrise()));
-                        txt_sunset.setText(Common.convertUnixToHour(weatherResult.getSys().getSunset()));
-                        txt_geo_coord.setText(new StringBuilder("[")
-                                .append(weatherResult.getCoord().toString())
-                                .append("]").toString());
-
-                        // Display panel
-                        weather_panel.setVisibility(View.VISIBLE);
-                        loading.setVisibility(View.GONE);
-
-                    }
-                }, new Consumer<Throwable>() {
-                               @Override
-                               public void accept(Throwable throwable) throws Exception {
-                                   Toast.makeText(getActivity(), ""+throwable.getMessage(),
-                                           Toast.LENGTH_SHORT).show();
-                               }
-                           }
-
-                )
-
-        );
-    }*/

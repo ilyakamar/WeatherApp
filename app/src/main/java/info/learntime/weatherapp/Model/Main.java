@@ -3,7 +3,7 @@ package info.learntime.weatherapp.Model;
 public class Main {
 
     private double temp ;
-    private double pressure ;
+    private float pressure ;
     private int humidity ;
     private double temp_min ;
     private double temp_max ;
@@ -25,11 +25,11 @@ public class Main {
         this.temp = temp;
     }
 
-    public double getPressure() {
+    public float getPressure() {
         return pressure;
     }
 
-    public void setPressure(double pressure) {
+    public void setPressure(float pressure) {
         this.pressure = pressure;
     }
 
