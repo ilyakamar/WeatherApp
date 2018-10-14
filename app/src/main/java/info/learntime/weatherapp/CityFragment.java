@@ -1,11 +1,10 @@
 package info.learntime.weatherapp;
 
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.label305.asynctask.SimpleAsyncTask;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import info.learntime.weatherapp.Common.Common;
 import info.learntime.weatherapp.Model.WeatherResult;
@@ -31,8 +42,12 @@ import retrofit2.Retrofit;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TodatWeatherFragment extends Fragment {
+public class CityFragment extends Fragment {
 
+
+
+    private List<String> lstCities;
+    private MaterialSearchBar searchBar;
 
     ImageView img_weather;
     TextView txt_city_name,txt_humidity,txt_sunrise,txt_sunset,txt_pressure,txt_temperature,txt_description,txt_date_time,txt_wind,txt_geo_coord;
@@ -42,15 +57,16 @@ public class TodatWeatherFragment extends Fragment {
     CompositeDisposable compositeDisposable;
     IOpenWeatherMap mService;
 
-    static TodatWeatherFragment instance;
 
-    public static TodatWeatherFragment getInstance(){
+    static CityFragment instance;
+
+    public static CityFragment getInstance(){
         if (instance == null)
-            instance = new TodatWeatherFragment();
+            instance = new CityFragment();
         return instance;
     }
 
-    public TodatWeatherFragment() {
+    public CityFragment() {
         compositeDisposable = new CompositeDisposable();
         Retrofit retrofit = RetrofitClient.getInstance();
         mService = retrofit.create(IOpenWeatherMap.class);
@@ -58,10 +74,12 @@ public class TodatWeatherFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View itemView = inflater.inflate(R.layout.fragment_todat_weather, container, false);
+        View itemView= inflater.inflate(R.layout.fragment_city, container, false);
+
+
 
         img_weather = (ImageView)itemView.findViewById(R.id.img_weather);
         txt_city_name = (TextView)itemView.findViewById(R.id.txt_city_name);
@@ -78,14 +96,94 @@ public class TodatWeatherFragment extends Fragment {
         weather_panel = (LinearLayout)itemView.findViewById(R.id.weather_panel);
         loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
-        getWeatherInformation();
+        searchBar = (MaterialSearchBar)itemView.findViewById(R.id.searchBar);
+        searchBar.setEnabled(false);
+
+
+        new LoadCities().execute(); // AsyncTask class to load cities list
 
         return itemView;
     }
 
-    private void getWeatherInformation() {
-        compositeDisposable.add(mService.getWeatherByLatLng(String.valueOf(Common.current_location.getLatitude()),
-                String.valueOf(Common.current_location.getLongitude()),
+    private class LoadCities extends SimpleAsyncTask<List<String>> {
+        @Override
+        protected List<String> doInBackgroundSimple() {
+            lstCities = new ArrayList<>();
+            try {
+                StringBuilder builder = new StringBuilder();
+                InputStream is = getResources().openRawResource(R.raw.city_list);
+                GZIPInputStream gzipInputStream = new GZIPInputStream(is);
+
+                InputStreamReader reader = new InputStreamReader(gzipInputStream);
+                BufferedReader in = new BufferedReader(reader);
+
+                String readed;
+                while ((readed = in.readLine())!= null)
+                    builder.append(readed);
+                lstCities = new Gson().fromJson(builder.toString(),new TypeToken<List<String>>(){}.getType());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return lstCities;
+        }
+
+        @Override
+        protected void onSuccess(final List<String> listCity) {
+            super.onSuccess(listCity);
+
+            searchBar.setEnabled(true);
+            searchBar.addTextChangeListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    List<String> suggest = new ArrayList<>();
+                    for (String search : listCity)
+                    {
+                        if (search.toLowerCase().contains(searchBar.getText().toLowerCase()))
+                            suggest.add(search);
+                    }
+                    searchBar.setLastSuggestions(suggest);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+            searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+                @Override
+                public void onSearchStateChanged(boolean enabled) {
+
+                }
+
+                @Override
+                public void onSearchConfirmed(CharSequence text) {
+
+                    getWeatherInformation(text.toString());
+
+                    searchBar.setLastSuggestions(listCity);
+                }
+
+                @Override
+                public void onButtonClicked(int buttonCode) {
+
+                }
+            });
+
+            searchBar.setLastSuggestions(listCity);
+
+            loading.setVisibility(View.GONE);
+
+        }
+    }
+
+    private void getWeatherInformation(String cityName) {
+        compositeDisposable.add(mService.getWeatherByCityName(cityName,
                 Common.APP_ID,
                 "metric")
                 .subscribeOn(Schedulers.io())
@@ -131,6 +229,7 @@ public class TodatWeatherFragment extends Fragment {
 
         );
     }
+
     @Override
     public void onDestroy() {
         compositeDisposable.clear();
@@ -144,4 +243,3 @@ public class TodatWeatherFragment extends Fragment {
         super.onStop();
     }
 }
-

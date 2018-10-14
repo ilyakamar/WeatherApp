@@ -69,6 +69,21 @@ public class ForecastFragment extends Fragment {
         return itemView;
     }
 
+
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
+
+
+    @Override
+    public void onStop() {
+        compositeDisposable.clear();
+        super.onStop();
+    }
+
+
     private void getForecastWeatherInformation() {
         compositeDisposable.add(mService.getForecastWeatherByLatLng(
                 String.valueOf(Common.current_location.getLatitude()),

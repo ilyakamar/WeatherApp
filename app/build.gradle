@@ -28,7 +28,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     // Play Services
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 
     // Dexter
     implementation 'com.karumi:dexter:5.0.0'
@@ -44,7 +44,14 @@ dependencies {
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
 
-
     // Card
     implementation 'com.android.support:cardview-v7:28.0.0'
+
+    // materialSearchBar  (need to add to allProject---> maven { url "https://jitpack.io" }  )
+    implementation 'com.github.mancj:MaterialSearchBar:0.7.6'
+
+    //
+    implementation 'com.label305:asynctask:1.0.0'
+
+
 }
